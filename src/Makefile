@@ -22,7 +22,7 @@
 ULFIUS_INCLUDE=../include
 CONFIG_TEMPLATE=$(ULFIUS_INCLUDE)/ulfius-cfg.h.in
 CONFIG_FILE=$(ULFIUS_INCLUDE)/ulfius-cfg.h
-DESTDIR=/usr/local
+DESTDIR=$(CAPS_HOME)
 CC=gcc
 CFLAGS+=-c -pedantic -std=gnu99 -fPIC -Wall -D_REENTRANT -I$(ULFIUS_INCLUDE) $(ADDITIONALFLAGS) $(CPPFLAGS)
 LIBS=-L$(DESTDIR)/lib -lc -lmicrohttpd -lyder -lorcania -lpthread $(LDFLAGS)
@@ -108,7 +108,7 @@ install: debug
 	install $(OUTPUT).$(VERSION) $(DESTDIR)/lib
 	install -m644 $(ULFIUS_INCLUDE)/ulfius.h $(DESTDIR)/include
 	install -m644 $(CONFIG_FILE) $(DESTDIR)/include
-	-ldconfig
+	/sbin/ldconfig -r $CAPS_HOME -N -v
 
 static-install: static
 	install libulfius.a $(DESTDIR)/lib
