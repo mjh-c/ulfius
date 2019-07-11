@@ -104,7 +104,7 @@ yuarel.o: $(ULFIUS_INCLUDE)/yuarel.h yuarel.c
 clean:
 	rm -f *.o *.so *.a $(OUTPUT) $(OUTPUT).* $(CONFIG_FILE)
 
-install: all
+install: debug
 	install $(OUTPUT).$(VERSION) $(DESTDIR)/lib
 	install -m644 $(ULFIUS_INCLUDE)/ulfius.h $(DESTDIR)/include
 	install -m644 $(CONFIG_FILE) $(DESTDIR)/include
