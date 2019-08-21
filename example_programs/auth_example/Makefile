@@ -16,8 +16,8 @@ CC=gcc
 ULFIUS_LOCATION=../../src
 ULFIUS_INCLUDE=../../include
 EXAMPLE_INCLUDE=../include
-CFLAGS+=-c -Wall -I$(ULFIUS_INCLUDE) -I$(EXAMPLE_INCLUDE) -D_REENTRANT $(ADDITIONALFLAGS) $(CPPFLAGS)
-LIBS=-lc -lgnutls -lulfius -lorcania -L$(ULFIUS_LOCATION)
+CFLAGS+=-c -Wall -I$(ULFIUS_INCLUDE) -I$(EXAMPLE_INCLUDE) -I$(CAPS_HOME)/include -D_REENTRANT $(ADDITIONALFLAGS) $(CPPFLAGS)
+LIBS=-lc -lgnutls -lulfius -lorcania -L$(ULFIUS_LOCATION) -L$(CAPS_HOME)/lib
 
 ifndef YDERFLAG
 LIBS+= -lyder

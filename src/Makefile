@@ -28,9 +28,9 @@ CONFIG_TEMPLATE=$(ULFIUS_INCLUDE)/ulfius-cfg.h.in
 CONFIG_FILE=$(ULFIUS_INCLUDE)/ulfius-cfg.h
 PKGCONFIG_FILE=../libulfius.pc
 PKGCONFIG_TEMPLATE=../libulfius.pc.in
-DESTDIR=/usr/local
+DESTDIR=$(CAPS_HOME)
 CC=gcc
-CFLAGS+=-c -pedantic -std=gnu99 -fPIC -Wall -Werror -Wextra -D_REENTRANT -I$(ULFIUS_INCLUDE) $(ADDITIONALFLAGS) $(CPPFLAGS)
+CFLAGS+=-c -pedantic -std=gnu99 -fPIC -Wall -Werror -Wextra -D_REENTRANT -I$(ULFIUS_INCLUDE) -I$(DESTDIR)/include $(ADDITIONALFLAGS) $(CPPFLAGS)
 LIBS=-L$(DESTDIR)/lib -lc -lmicrohttpd -lorcania -lpthread $(LDFLAGS)
 SONAME = -soname
 ifeq ($(shell uname -s),Darwin)
@@ -180,12 +180,12 @@ libulfius.a: $(OBJECTS)
 clean:
 	rm -f *.o *.so *.a $(OUTPUT) $(OUTPUT).* $(CONFIG_FILE) $(PKGCONFIG_FILE)
 
-install: all $(PKGCONFIG_FILE)
+install: debug $(PKGCONFIG_FILE)
 	install $(OUTPUT).$(VERSION) $(DESTDIR)/lib
 	install -m644 $(PKGCONFIG_FILE) $(DESTDIR)/lib/pkgconfig
 	install -m644 $(ULFIUS_INCLUDE)/ulfius.h $(DESTDIR)/include
 	install -m644 $(CONFIG_FILE) $(DESTDIR)/include
-	-ldconfig
+	/sbin/ldconfig -r $(CAPS_HOME) -N -v
 
 static-install: static
 	install libulfius.a $(DESTDIR)/lib
