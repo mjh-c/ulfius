@@ -806,7 +806,12 @@ static int ulfius_webservice_dispatcher (void * cls, struct MHD_Connection * con
  *
  */
 static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance, const char * key_pem, const char * cert_pem, const char * root_ca_perm) {
-unsigned int mhd_flags = MHD_USE_POLL_INTERNAL_THREAD;
+
+#if MHD_VERSION >= 0x00095300
+  unsigned int mhd_flags = MHD_USE_POLL_INTERNAL_THREAD;
+#else
+  unsigned int mhd_flags = MHD_USE_POLL_INTERNALLY;
+#endif
 
 #if 0
 #if MHD_VERSION < 0x00095208
