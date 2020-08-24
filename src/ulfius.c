@@ -1,11 +1,11 @@
 /**
- * 
+ *
  * Ulfius Framework
- * 
+ *
  * REST framework library
- * 
+ *
  * ulfius.c: framework functions definitions
- * 
+ *
  * Copyright 2015-2020 Nicolas Mora <mail@babelouest.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 #include <string.h>
@@ -73,7 +73,7 @@ static int ulfius_fill_map_check_utf8(void * cls, enum MHD_ValueKind kind, const
   char * tmp;
   int res;
   UNUSED(kind);
-  
+
   if (cls == NULL || key == NULL) {
     // Invalid parameters
     y_log_message(Y_LOG_LEVEL_ERROR, "Ulfius - Error invalid parameters for ulfius_fill_map_check_utf8");
@@ -110,7 +110,7 @@ static int ulfius_fill_map(void * cls, enum MHD_ValueKind kind, const char * key
   char * tmp;
   int res;
   UNUSED(kind);
-  
+
   if (cls == NULL || key == NULL) {
     // Invalid parameters
     y_log_message(Y_LOG_LEVEL_ERROR, "Ulfius - Error invalid parameters for ulfius_fill_map");
@@ -205,7 +205,7 @@ static int ulfius_validate_instance(const struct _u_instance * u_instance) {
 void * ulfius_uri_logger (void * cls, const char * uri) {
   struct connection_info_struct * con_info = o_malloc (sizeof (struct connection_info_struct));
   UNUSED(cls);
-  
+
   if (con_info != NULL) {
     con_info->callback_first_iteration = 1;
     con_info->u_instance = NULL;
@@ -216,7 +216,7 @@ void * ulfius_uri_logger (void * cls, const char * uri) {
       o_free(con_info);
       return NULL;
     }
-    
+
     if (NULL == con_info->request || ulfius_init_request(con_info->request) != U_OK) {
       ulfius_clean_request_full(con_info->request);
       o_free(con_info);
@@ -285,7 +285,7 @@ void mhd_request_completed (void *cls, struct MHD_Connection *connection,
   UNUSED(toe);
   UNUSED(connection);
   UNUSED(cls);
-  
+
   if (NULL == con_info) {
     return;
   }
@@ -319,7 +319,7 @@ static int mhd_iterate_post_data (void * coninfo_cls, enum MHD_ValueKind kind, c
   size_t cur_size = size;
   char * data_dup, * filename_param;
   UNUSED(kind);
-  
+
   if (filename != NULL && con_info->u_instance != NULL && con_info->u_instance->file_upload_callback != NULL) {
     if (con_info->u_instance->file_upload_callback(con_info->request, key, filename, content_type, transfer_encoding, data, off, size, con_info->u_instance->file_upload_cls) == U_OK) {
       return MHD_YES;
@@ -343,7 +343,7 @@ static int mhd_iterate_post_data (void * coninfo_cls, enum MHD_ValueKind kind, c
     } else {
       return MHD_NO;
     }
-    
+
     if (filename != NULL) {
       filename_param = msprintf("%s_filename", key);
       if (!u_map_has_key((struct _u_map *)con_info->request->map_post_body, filename_param) && u_map_put((struct _u_map *)con_info->request->map_post_body, filename_param, filename) != U_OK) {
@@ -351,7 +351,7 @@ static int mhd_iterate_post_data (void * coninfo_cls, enum MHD_ValueKind kind, c
       }
       o_free(filename_param);
     }
-    
+
     if (cur_size > 0 && data_dup != NULL && u_map_put_binary((struct _u_map *)con_info->request->map_post_body, key, data_dup, off, cur_size + 1) == U_OK) {
       o_free(data_dup);
       return MHD_YES;
@@ -413,22 +413,22 @@ static int ulfius_webservice_dispatcher (void * cls,
   char * content_type, * auth_realm = NULL;
   struct _u_response * response = NULL;
   struct sockaddr * so_client;
-  
+
   void * response_buffer = NULL;
   size_t response_buffer_len = 0;
-  
+
   // Response variables
   struct MHD_Response * mhd_response = NULL;
-  
+
   UNUSED(url);
-  
+
   // Prepare for POST or PUT input data
   // Initialize the input maps
   if (con_info == NULL) {
     y_log_message(Y_LOG_LEVEL_ERROR, "Ulfius - Error con_info is NULL");
     return MHD_NO;
   }
-  
+
   if (con_info->u_instance == NULL) {
     con_info->u_instance = (struct _u_instance *)cls;
   }
@@ -476,9 +476,9 @@ static int ulfius_webservice_dispatcher (void * cls,
       MHD_get_connection_values (connection, MHD_COOKIE_KIND, ulfius_fill_map, con_info->request->map_cookie);
     }
     content_type = (char*)u_map_get_case(con_info->request->map_header, ULFIUS_HTTP_HEADER_CONTENT);
-    
+
     // Set POST Processor if content-type is properly set
-    if (content_type != NULL && (0 == o_strncmp(MHD_HTTP_POST_ENCODING_FORM_URLENCODED, content_type, o_strlen(MHD_HTTP_POST_ENCODING_FORM_URLENCODED)) || 
+    if (content_type != NULL && (0 == o_strncmp(MHD_HTTP_POST_ENCODING_FORM_URLENCODED, content_type, o_strlen(MHD_HTTP_POST_ENCODING_FORM_URLENCODED)) ||
         0 == o_strncmp(MHD_HTTP_POST_ENCODING_MULTIPART_FORMDATA, content_type, o_strlen(MHD_HTTP_POST_ENCODING_MULTIPART_FORMDATA)))) {
       con_info->has_post_processor = 1;
       con_info->post_processor = MHD_create_post_processor (connection, ULFIUS_POSTBUFFERSIZE, mhd_iterate_post_data, (void *) con_info);
@@ -492,12 +492,12 @@ static int ulfius_webservice_dispatcher (void * cls,
     return MHD_YES;
   } else if (*upload_data_size != 0) {
     size_t body_len = con_info->request->binary_body_length + *upload_data_size, upload_data_size_current = *upload_data_size;
-    
+
     if (((struct _u_instance *)cls)->max_post_body_size > 0 && con_info->request->binary_body_length + *upload_data_size > ((struct _u_instance *)cls)->max_post_body_size) {
       body_len = ((struct _u_instance *)cls)->max_post_body_size;
       upload_data_size_current = ((struct _u_instance *)cls)->max_post_body_size - con_info->request->binary_body_length;
     }
-    
+
     if (body_len >= con_info->request->binary_body_length) {
       con_info->request->binary_body = o_realloc(con_info->request->binary_body, body_len);
       if (con_info->request->binary_body == NULL) {
@@ -508,7 +508,7 @@ static int ulfius_webservice_dispatcher (void * cls,
         con_info->request->binary_body_length += upload_data_size_current;
         // Handles request binary_body
         const char * content_type = u_map_get_case(con_info->request->map_header, ULFIUS_HTTP_HEADER_CONTENT);
-        if (0 == o_strncmp(MHD_HTTP_POST_ENCODING_FORM_URLENCODED, content_type, o_strlen(MHD_HTTP_POST_ENCODING_FORM_URLENCODED)) || 
+        if (0 == o_strncmp(MHD_HTTP_POST_ENCODING_FORM_URLENCODED, content_type, o_strlen(MHD_HTTP_POST_ENCODING_FORM_URLENCODED)) ||
             0 == o_strncmp(MHD_HTTP_POST_ENCODING_MULTIPART_FORMDATA, content_type, o_strlen(MHD_HTTP_POST_ENCODING_MULTIPART_FORMDATA))) {
           MHD_post_process (con_info->post_processor, upload_data, *upload_data_size);
         }
@@ -521,7 +521,7 @@ static int ulfius_webservice_dispatcher (void * cls,
   } else {
     // Check if the endpoint has one or more matches
     current_endpoint_list = ulfius_endpoint_match(method, con_info->request->url_path, endpoint_list);
-    
+
     // Set to default_endpoint if no match
     if ((current_endpoint_list == NULL || current_endpoint_list[0] == NULL) && ((struct _u_instance *)cls)->default_endpoint != NULL && ((struct _u_instance *)cls)->default_endpoint->callback_function != NULL) {
       current_endpoint_list = o_realloc(current_endpoint_list, 2*sizeof(struct _u_endpoint *));
@@ -538,7 +538,7 @@ static int ulfius_webservice_dispatcher (void * cls,
         y_log_message(Y_LOG_LEVEL_ERROR, "Ulfius - Error allocating memory for current_endpoint_list of default endpoint");
       }
     }
-    
+
 #if MHD_VERSION >= 0x00096100
     mhd_response_flag = ((struct _u_instance *)cls)->mhd_response_copy_data?MHD_RESPMEM_MUST_COPY:MHD_RESPMEM_MUST_FREE;
 #else
@@ -559,10 +559,10 @@ static int ulfius_webservice_dispatcher (void * cls,
           u_map_clean_full(response->map_header);
           response->map_header = u_map_copy(((struct _u_instance *)cls)->default_headers);
         }
-        
+
         // Initialize auth variables
         con_info->request->auth_basic_user = MHD_basic_auth_get_username_password(connection, &con_info->request->auth_basic_password);
-        
+
         for (i=0; current_endpoint_list[i] != NULL && !close_loop; i++) {
           current_endpoint = current_endpoint_list[i];
           u_map_empty(con_info->request->map_url);
@@ -607,7 +607,7 @@ static int ulfius_webservice_dispatcher (void * cls,
                   0 == o_strcmp(con_info->request->http_verb, "GET")) {
                 int ret_protocol = 0, ret_extensions = 0;
                 // Check websocket_protocol and websocket_extensions to match ours
-                if ((ret_extensions = ulfius_check_list_match(u_map_get(con_info->request->map_header, "Sec-WebSocket-Extensions"), ((struct _websocket_handle *)response->websocket_handle)->websocket_extensions, ";", &extension)) == U_OK && 
+                if ((ret_extensions = ulfius_check_list_match(u_map_get(con_info->request->map_header, "Sec-WebSocket-Extensions"), ((struct _websocket_handle *)response->websocket_handle)->websocket_extensions, ";", &extension)) == U_OK &&
                     (ret_protocol = ulfius_check_first_match(u_map_get(con_info->request->map_header, "Sec-WebSocket-Protocol"), ((struct _websocket_handle *)response->websocket_handle)->websocket_protocol, ",", &protocol)) == U_OK) {
                   char websocket_accept[32] = {0};
                   if (ulfius_generate_handshake_answer(u_map_get(con_info->request->map_header, "Sec-WebSocket-Key"), websocket_accept)) {
@@ -852,10 +852,14 @@ static int ulfius_webservice_dispatcher (void * cls,
  * ulfius_run_mhd_daemon
  * Starts a mhd daemon for the specified instance
  * return a pointer to the mhd_daemon on success, NULL on error
- * 
+ *
  */
 static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance, const char * key_pem, const char * cert_pem, const char * root_ca_perm) {
-  unsigned int mhd_flags = MHD_USE_THREAD_PER_CONNECTION;
+  /*
+   * We cannot use "thread per connection" since our business logic behind
+   * does not support multi-threading at all.
+   */
+  unsigned int mhd_flags = MHD_USE_AUTO_INTERNAL_THREAD;
   int index;
 
 #ifdef DEBUG
@@ -867,15 +871,15 @@ static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance
 #ifndef U_DISABLE_WEBSOCKET
   mhd_flags |= MHD_ALLOW_UPGRADE;
 #endif
-  
+
   if (u_instance->mhd_daemon == NULL) {
-    struct MHD_OptionItem mhd_ops[8];
-    
+    struct MHD_OptionItem mhd_ops[9];
+
     // Default options
     mhd_ops[0].option = MHD_OPTION_NOTIFY_COMPLETED;
     mhd_ops[0].value = (intptr_t)mhd_request_completed;
     mhd_ops[0].ptr_value = NULL;
-    
+
 #if MHD_VERSION >= 0x00095208
     // If bind_address6 is specified, listen only to IPV6 addresses
     if (u_instance->bind_address6 != NULL) {
@@ -901,12 +905,20 @@ static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance
     mhd_ops[1].value = 0;
     mhd_ops[1].ptr_value = (void *)u_instance->bind_address;
 #endif
-    
+
     mhd_ops[2].option = MHD_OPTION_URI_LOG_CALLBACK;
     mhd_ops[2].value = (intptr_t)ulfius_uri_logger;
     mhd_ops[2].ptr_value = NULL;
-    
-    index = 3;
+
+    /*
+     * Set explicitly the thread pool size to 1 to make double-sure
+     * that we do not have a multi-threaded server
+     */
+    mhd_ops[3].option = MHD_OPTION_THREAD_POOL_SIZE;
+    mhd_ops[3].value = 1;
+    mhd_ops[3].ptr_value = NULL;
+
+    index = 4;
 
     if (key_pem != NULL && cert_pem != NULL) {
       // HTTPS parameters
@@ -914,11 +926,11 @@ static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance
       mhd_ops[index].option = MHD_OPTION_HTTPS_MEM_KEY;
       mhd_ops[index].value = 0;
       mhd_ops[index].ptr_value = (void*)key_pem;
-     
+
       mhd_ops[index + 1].option = MHD_OPTION_HTTPS_MEM_CERT;
       mhd_ops[index + 1].value = 0;
       mhd_ops[index + 1].ptr_value = (void*)cert_pem;
-      
+
       index += 2;
 
       if (root_ca_perm != NULL) {
@@ -933,7 +945,7 @@ static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance
       mhd_ops[index].option = MHD_OPTION_CONNECTION_TIMEOUT;
       mhd_ops[index].value = u_instance->timeout;
       mhd_ops[index].ptr_value = NULL;
-      
+
       index++;
     }
 
@@ -942,7 +954,7 @@ static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance
     mhd_ops[index].ptr_value = NULL;
 
     return MHD_start_daemon (
-      mhd_flags, u_instance->port, NULL, NULL, &ulfius_webservice_dispatcher, (void *)u_instance, 
+      mhd_flags, u_instance->port, NULL, NULL, &ulfius_webservice_dispatcher, (void *)u_instance,
       MHD_OPTION_ARRAY, mhd_ops,
       MHD_OPTION_END
     );
@@ -956,7 +968,7 @@ static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance
  * ulfius_start_framework
  * Initializes the framework and run the webservice based on the parameters given
  * return true if no error
- * 
+ *
  * u_instance:    pointer to a struct _u_instance that describe its port and bind address
  * return U_OK on success
  */
@@ -971,7 +983,7 @@ int ulfius_start_framework(struct _u_instance * u_instance) {
 /**
  * ulfius_start_secure_framework
  * Initializes the framework and run the webservice based on the parameters given using an HTTPS connection
- * 
+ *
  * u_instance:    pointer to a struct _u_instance that describe its port and bind address
  * key_pem:       private key for the server
  * cert_pem:      server certificate
@@ -984,7 +996,7 @@ int ulfius_start_secure_framework(struct _u_instance * u_instance, const char * 
 #ifndef U_DISABLE_JANSSON
   o_malloc_t malloc_fn;
   o_free_t free_fn;
-  
+
   o_get_alloc_funcs(&malloc_fn, NULL, &free_fn);
   json_set_alloc_funcs((json_malloc_t)malloc_fn, (json_free_t)free_fn);
 #endif
@@ -998,7 +1010,7 @@ int ulfius_start_secure_framework(struct _u_instance * u_instance, const char * 
   }
   if (ulfius_validate_instance(u_instance) == U_OK) {
     u_instance->mhd_daemon = ulfius_run_mhd_daemon(u_instance, key_pem, cert_pem, NULL);
-    
+
     if (u_instance->mhd_daemon == NULL) {
       y_log_message(Y_LOG_LEVEL_ERROR, "Ulfius - Error MHD_start_daemon, aborting");
       u_instance->status = U_STATUS_ERROR;
@@ -1019,7 +1031,7 @@ int ulfius_start_secure_framework(struct _u_instance * u_instance, const char * 
  * ulfius_start_secure_ca_trust_framework
  * Initializes the framework and run the webservice based on the parameters given using an HTTPS connection
  * And using a root server to authenticate client connections
- * 
+ *
  * u_instance:    pointer to a struct _u_instance that describe its port and bind address
  * key_pem:       private key for the server
  * cert_pem:      server certificate
@@ -1030,7 +1042,7 @@ int ulfius_start_secure_ca_trust_framework(struct _u_instance * u_instance, cons
 #ifndef U_DISABLE_JANSSON
   o_malloc_t malloc_fn;
   o_free_t free_fn;
-  
+
   o_get_alloc_funcs(&malloc_fn, NULL, &free_fn);
   json_set_alloc_funcs((json_malloc_t)malloc_fn, (json_free_t)free_fn);
 #endif
@@ -1052,7 +1064,7 @@ int ulfius_start_secure_ca_trust_framework(struct _u_instance * u_instance, cons
   }
   if (ulfius_validate_instance(u_instance) == U_OK) {
     u_instance->mhd_daemon = ulfius_run_mhd_daemon(u_instance, key_pem, cert_pem, root_ca_pem);
-    
+
     if (u_instance->mhd_daemon == NULL) {
       y_log_message(Y_LOG_LEVEL_ERROR, "Ulfius - Error MHD_start_daemon, aborting");
       u_instance->status = U_STATUS_ERROR;
@@ -1108,7 +1120,7 @@ int ulfius_start_framework_with_mhd_options(struct _u_instance * u_instance, uns
 
 /**
  * ulfius_stop_framework
- * 
+ *
  * Stop the webservice
  * u_instance:    pointer to a struct _u_instance that describe its port and bind address
  * return U_OK on success
@@ -1126,7 +1138,7 @@ int ulfius_stop_framework(struct _u_instance * u_instance) {
       pthread_cond_wait(&((struct _websocket_handler *)u_instance->websocket_handler)->websocket_close_cond, &((struct _websocket_handler *)u_instance->websocket_handler)->websocket_close_lock);
     }
     pthread_mutex_unlock(&((struct _websocket_handler *)u_instance->websocket_handler)->websocket_close_lock);
-#endif 
+#endif
     MHD_stop_daemon (u_instance->mhd_daemon);
     u_instance->mhd_daemon = NULL;
     u_instance->status = U_STATUS_STOP;
@@ -1168,7 +1180,7 @@ int ulfius_copy_endpoint(struct _u_endpoint * dest, const struct _u_endpoint * s
 struct _u_endpoint * ulfius_duplicate_endpoint_list(const struct _u_endpoint * endpoint_list) {
   struct _u_endpoint * to_return = NULL;
   int i;
-  
+
   if (endpoint_list != NULL) {
     for (i=0; endpoint_list[i].http_method != NULL; i++) {
       if ((to_return = o_realloc(to_return, (i+1)*sizeof(struct _u_endpoint *))) == NULL) {
@@ -1203,7 +1215,7 @@ void ulfius_clean_endpoint(struct _u_endpoint * endpoint) {
  */
 void ulfius_clean_endpoint_list(struct _u_endpoint * endpoint_list) {
   int i;
-  
+
   if (endpoint_list != NULL) {
     for (i=0; endpoint_list[i].http_method != NULL; i++) {
       ulfius_clean_endpoint(&endpoint_list[i]);
@@ -1221,7 +1233,7 @@ void ulfius_clean_endpoint_list(struct _u_endpoint * endpoint_list) {
  */
 int ulfius_add_endpoint(struct _u_instance * u_instance, const struct _u_endpoint * u_endpoint) {
   int res;
-  
+
   if (u_instance != NULL && u_endpoint != NULL) {
     if (ulfius_is_valid_endpoint(u_endpoint, 0)) {
       if (u_instance->endpoint_list == NULL) {
@@ -1306,7 +1318,7 @@ int ulfius_remove_endpoint(struct _u_instance * u_instance, const struct _u_endp
       trim_cur_prefix = trimcharacter(trim_cur_prefix_save, '/');
       trim_cur_format_save = o_strdup(u_instance->endpoint_list[i].url_format);
       trim_cur_format = trimcharacter(trim_cur_format_save, '/');
-      
+
       // Compare u_endpoint with u_instance->endpoint_list[i]
       if (0 == o_strcmp(u_instance->endpoint_list[i].http_method, u_endpoint->http_method) &&
           0 == o_strcmp(trim_cur_prefix, trim_prefix) &&
@@ -1352,7 +1364,7 @@ int ulfius_remove_endpoint(struct _u_instance * u_instance, const struct _u_endp
  */
 const struct _u_endpoint * ulfius_empty_endpoint() {
   static struct _u_endpoint empty_endpoint;
-  
+
   empty_endpoint.http_method = NULL;
   empty_endpoint.url_prefix = NULL;
   empty_endpoint.url_format = NULL;
@@ -1483,32 +1495,32 @@ int ulfius_set_default_endpoint(struct _u_instance * u_instance,
 
 /**
  * ulfius_set_upload_file_callback_function
- * 
+ *
  * Set the callback function to handle file upload
  * Used to facilitate large files upload management
  * The callback function file_upload_callback will be called
  * multiple times, with the uploaded file in striped in parts
- * 
+ *
  * Warning: If this function is used, all the uploaded files
  * for the instance will be managed via this function, and they
  * will no longer be available in the struct _u_request in the
  * ulfius callback function afterwards.
- * 
+ *
  * Thanks to Thad Phetteplace for the help on this feature
- * 
+ *
  * u_instance:    pointer to a struct _u_instance that describe its port and bind address
  * file_upload_callback: Pointer to a callback function that will handle all file uploads
  * cls: a pointer that will be passed to file_upload_callback each tim it's called
  */
 int ulfius_set_upload_file_callback_function(struct _u_instance * u_instance,
-                                             int (* file_upload_callback) (const struct _u_request * request, 
-                                                                           const char * key, 
-                                                                           const char * filename, 
-                                                                           const char * content_type, 
-                                                                           const char * transfer_encoding, 
-                                                                           const char * data, 
-                                                                           uint64_t off, 
-                                                                           size_t size, 
+                                             int (* file_upload_callback) (const struct _u_request * request,
+                                                                           const char * key,
+                                                                           const char * filename,
+                                                                           const char * content_type,
+                                                                           const char * transfer_encoding,
+                                                                           const char * data,
+                                                                           uint64_t off,
+                                                                           size_t size,
                                                                            void * cls),
                                              void * cls) {
   if (u_instance != NULL && file_upload_callback != NULL) {
@@ -1522,7 +1534,7 @@ int ulfius_set_upload_file_callback_function(struct _u_instance * u_instance,
 
 /**
  * ulfius_clean_instance
- * 
+ *
  * Clean memory allocated by a struct _u_instance *
  */
 void ulfius_clean_instance(struct _u_instance * u_instance) {
@@ -1539,7 +1551,7 @@ void ulfius_clean_instance(struct _u_instance * u_instance) {
 #ifndef U_DISABLE_WEBSOCKET
     /* ulfius_clean_instance might be called without websocket_handler being initialized */
     if ((struct _websocket_handler *)u_instance->websocket_handler) {
-        if (((struct _websocket_handler *)u_instance->websocket_handler)->pthread_init && 
+        if (((struct _websocket_handler *)u_instance->websocket_handler)->pthread_init &&
             (pthread_mutex_destroy(&((struct _websocket_handler *)u_instance->websocket_handler)->websocket_close_lock) ||
             pthread_cond_destroy(&((struct _websocket_handler *)u_instance->websocket_handler)->websocket_close_cond))) {
           y_log_message(Y_LOG_LEVEL_ERROR, "Ulfius - Error destroying websocket_close_lock or websocket_close_cond");
@@ -1553,7 +1565,7 @@ void ulfius_clean_instance(struct _u_instance * u_instance) {
 
 /**
  * internal_ulfius_init_instance
- * 
+ *
  * Initialize a struct _u_instance * with default values
  * internal function used by both ulfius_init_instance and ulfius_init_instance_ipv6
  * port:               tcp port to bind to, must be between 1 and 65535
@@ -1609,7 +1621,7 @@ UNUSED(network_type);
     ((struct _websocket_handler *)u_instance->websocket_handler)->pthread_init = 0;
     ((struct _websocket_handler *)u_instance->websocket_handler)->nb_websocket_active = 0;
     ((struct _websocket_handler *)u_instance->websocket_handler)->websocket_active = NULL;
-    if (pthread_mutex_init(&((struct _websocket_handler *)u_instance->websocket_handler)->websocket_close_lock, NULL) || 
+    if (pthread_mutex_init(&((struct _websocket_handler *)u_instance->websocket_handler)->websocket_close_lock, NULL) ||
         pthread_cond_init(&((struct _websocket_handler *)u_instance->websocket_handler)->websocket_close_cond, NULL)) {
       y_log_message(Y_LOG_LEVEL_ERROR, "Ulfius - Error initializing websocket_close_lock or websocket_close_cond");
       ulfius_clean_instance(u_instance);
@@ -1627,7 +1639,7 @@ UNUSED(network_type);
 
 /**
  * ulfius_init_instance
- * 
+ *
  * Initialize a struct _u_instance * with default values
  * Binds to IPV4 addresses only
  * port:               tcp port to bind to, must be between 1 and 65535
@@ -1642,7 +1654,7 @@ int ulfius_init_instance(struct _u_instance * u_instance, unsigned int port, str
 #if MHD_VERSION >= 0x00095208
 /**
  * ulfius_init_instance_ipv6
- * 
+ *
  * Initialize a struct _u_instance * with default values
  * Binds to IPV6 and IPV4 or IPV6 addresses only
  * port:               tcp port to bind to, must be between 1 and 65535
@@ -1761,11 +1773,11 @@ char * ulfius_url_encode(const char * str) {
         // "$-_.+!*'(),"
         if (isalnum(* pstr) || * pstr == '$' || * pstr == '-' || * pstr == '_' ||
             * pstr == '.' || * pstr == '!' || * pstr == '*' ||
-            * pstr == '\'' || * pstr == '(' || * pstr == ')' || * pstr == ',') 
+            * pstr == '\'' || * pstr == '(' || * pstr == ')' || * pstr == ',')
           * pbuf++ = * pstr;
-        else if (* pstr == ' ') 
+        else if (* pstr == ' ')
           * pbuf++ = '+';
-        else 
+        else
           * pbuf++ = '%', * pbuf++ = to_hex(* pstr >> 4), * pbuf++ = to_hex(* pstr & 15);
         pstr++;
       }
@@ -1797,7 +1809,7 @@ char * ulfius_url_decode(const char * str) {
             * pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
             pstr += 2;
           }
-        } else if (* pstr == '+') { 
+        } else if (* pstr == '+') {
           * pbuf++ = ' ';
         } else {
           * pbuf++ = * pstr;
@@ -1819,7 +1831,7 @@ int ulfius_global_init() {
   o_malloc_t malloc_fn;
   o_realloc_t realloc_fn;
   o_free_t free_fn;
-  
+
   o_get_alloc_funcs(&malloc_fn, &realloc_fn, &free_fn);
 #ifndef U_DISABLE_CURL
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
