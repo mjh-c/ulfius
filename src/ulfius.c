@@ -859,7 +859,7 @@ static struct MHD_Daemon * ulfius_run_mhd_daemon(struct _u_instance * u_instance
    * We cannot use "thread per connection" since our business logic behind
    * does not support multi-threading at all.
    */
-  unsigned int mhd_flags = MHD_USE_AUTO_INTERNAL_THREAD;
+  unsigned int mhd_flags = MHD_USE_AUTO_INTERNAL_THREAD | MHD_USE_ERROR_LOG;
   int index;
 
 #ifdef DEBUG
